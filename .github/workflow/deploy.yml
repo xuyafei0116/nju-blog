@@ -1,0 +1,44 @@
+name: Deploy Hexo Blog
+
+# 触发条件：当 main 分支有代码推送时
+on:
+  push:
+    branches:
+      - master
+
+# 权限设置：允许 Token 读写 Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 任务配置
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # 使用 GitHub 提供的最新 Ubuntu 虚拟机
+    steps:
+      # 1. 拉取代码
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # 2. 安装 Node.js (Hexo 依赖)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. 安装依赖 & 构建
+      - name: Install & Build
+        run: |
+          npm install
+          npx hexo generate
+
+      # 4. 上传构建产物 (public 目录)
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public # Hexo 默认生成的静态文件目录
+
+      # 5. 部署到 GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
