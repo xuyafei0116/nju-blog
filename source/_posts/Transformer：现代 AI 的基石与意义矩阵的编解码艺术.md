@@ -1,6 +1,6 @@
 ---
 title: Transformer：现代 AI 的基石与意义矩阵的编解码艺术
-date: 2026-02-15 15:00:00
+date: 2026-02-16 15:00:00
 tags:
   - Transformer
   - AI
