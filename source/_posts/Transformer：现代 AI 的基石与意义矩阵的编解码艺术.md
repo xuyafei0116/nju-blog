@@ -63,7 +63,7 @@ Transformer 的 Encoder 和 Decoder 既可合体 (如机器翻译)，亦可独�
     - **代表**：GPT 系列, LLaMA。
     - **训练**：Causal Language Modeling (文本接龙)。根据上文预测下文。
     - **应用**：对话生成、代码补全、创意写作。
-    - ![Decoder-only 架构图](/img/illustration/decode-only.png)
+    - ![Decoder-only 架构图](/nju-blog/img/illustration/decode-only.png)
 3.  **Encoder-Decoder (互译流)**：
     - **代表**：T5, BART。
     - **应用**：机器翻译、文本摘要。
