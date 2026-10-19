@@ -343,21 +343,12 @@ Flink CDC   Canal          Flink CDC   Debezium
 
 ### 实践一：Redis与MySQL双写一致性
 
-**传统问题**：
-```java
-userRepository.save(user);      // 写DB
-cache.delete("user:" + id);     // 删缓存
-// 问题：DB成功，Redis失败，数据不一致
-```
+第零节讲过的双写之痛——先写 DB 再删缓存，两步之间没有事务保证。
 
 **CDC方案**：
 ```
-应用只写MySQL → Debezium Server(HTTP模式) → 调用缓存服务API → 删Redis
+应用只写MySQL → Debezium Server(HTTP模式)调缓存服务API → 删Redis
 ```
-
-● 单向数据流
-● 最终一致性
-● 应用代码极简
 
 ### 实践二：CQRS架构数据同步
 
@@ -421,13 +412,7 @@ public class OrderEventHandler {
 
 ## 七、结语
 
-CDC本质是平衡**实时性**、**一致性**与**系统复杂性**。
-
-- 只有MySQL，追求简单 → **Canal**
-- 多数据源，依赖Kafka → **Debezium(Kafka Connect)**
-- 多数据源，不想引入Kafka → **Debezium Server(独立模式)**
-- 同步即计算，架构极简 → **Flink CDC**
-- 小团队，不想维护MQ，需业务解耦 → **Debezium Embedded** 或 **Canal**
+CDC本质是平衡**实时性**、**一致性**与**系统复杂性**——选型决策见第五节金字塔。
 
 ### 选型原则
 
@@ -435,7 +420,6 @@ CDC本质是平衡**实时性**、**一致性**与**系统复杂性**。
 2. 考虑团队能力
 3. 着眼未来，避免后期重构
 4. 从简单开始，渐进式演进
-5. CDC可作为MQ"前置方案"，避免过度设计
 
 ### CDC未来趋势
 
