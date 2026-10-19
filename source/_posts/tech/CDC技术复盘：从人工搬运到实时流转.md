@@ -144,26 +144,7 @@ DB → Debezium → Kafka Topic ← 服务A
 | Debezium Server | 独立应用，支持Kinesis/PubSub/Pulsar/HTTP | 无Kafka环境 |
 | Embedded | 库嵌入Java应用 | 微服务、轻量级 |
 
-**Debezium Server独立模式**：
-
- misconception：Debezium必须依赖Kafka。
-
- reality：Debezium Server可直接发送到多种Sink：
-```
-DB → Debezium Server → Kinesis/PubSub/Pulsar/RabbitMQ/HTTP
-```
-
-支持的 Sink 类型：
-
-| Sink 类型 | 适用场景 |
-|-----------|----------|
-| Amazon Kinesis | AWS 云原生环境 |
-| Google Pub/Sub | GCP 云原生环境 |
-| Apache Pulsar | 云原生消息队列 |
-| RabbitMQ | 传统消息队列替代方案 |
-| HTTP/REST | 直接调用微服务接口 |
-| Redis Streams | 轻量级流处理 |
-| Apache Kafka | 兼容原有 Kafka 生态 |
+**Debezium Server 独立模式**：Debezium 不必须依赖 Kafka——Server 可直接发到云原生通道（Kinesis/PubSub）、消息队列（Pulsar/RabbitMQ/Kafka）或轻量通道（HTTP/Redis Streams）。
 
 配置示例：
 ```yaml
@@ -337,16 +318,7 @@ Flink CDC   Canal          Flink CDC   Debezium
 ● Exactly-Once原生支持
 
 **§ 场景四：小团队，不想维护MQ，需业务解耦**
-→ **Debezium Embedded** 或 **Canal**
-
-架构：
-```
-订单服务(只写DB) → MySQL → CDC → 库存/通知服务
-```
-
-● 零侵入，订单服务代码不改
-● 无中间件，CDC直连消费者
-● 渐进式演进，后期可平滑迁移到Kafka
+→ **Debezium Embedded** 或 **Canal**——零侵入直连，后期可平滑迁 Kafka（需求见第零节，落地见实践三）
 
 **何时升级到Kafka？**
 
@@ -429,23 +401,7 @@ public class OrderEventHandler {
 }
 ```
 
-**数据一致性**：
-
-轻量级方案提供At-Least-Once语义：
-● 数据不丢失(基于DB事务)
-○ 可能重复投递
-
-幂等消费：
-```java
-@EventListener
-public void onOrderCreated(OrderCreatedEvent event) {
-    String key = String.format("order:%s:%s", event.getOrderId(), event.getEventType());
-    if (redis.opsForValue().setIfAbsent(key, "1", Duration.ofHours(24))) {
-        inventoryService.deductStock(event.getOrder());
-        notificationService.sendSms(event.getOrder());
-    }
-}
-```
+**数据一致性**：At-Least-Once——基于 DB 事务不丢失、可能重复投递，幂等消费同第四节代码（同一个 key：orderId+eventType，换成 `setIfAbsent` 写法）。
 
 ### 实践四：实时数仓构建
 
